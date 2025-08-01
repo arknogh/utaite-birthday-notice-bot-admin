@@ -1,4 +1,6 @@
-import type { Metadata } from "next";
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -15,16 +17,14 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Utaite Birthday Admin",
-  description: "Admin panel for managing birthdays database",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname();
+  const isAuthPage = pathname.startsWith('/auth');
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -36,7 +36,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          {!isAuthPage && <Navbar />}
           {children}
           <Toaster />
         </ThemeProvider>
