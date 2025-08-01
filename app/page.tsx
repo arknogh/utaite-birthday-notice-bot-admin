@@ -11,12 +11,16 @@ export default function Home() {
   const [filters, setFilters] = useState<FilterValues>({
     name: 'all',
     year: 'all',
-    twitter: 'all'
+    twitter: 'all',
+    search: ''
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshBirthdays = useCallback(async () => {
+    setIsLoading(true);
     const bdays = await getBirthdays();
     setBirthdays(bdays);
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -28,10 +32,11 @@ export default function Home() {
       <main className="container mx-auto py-10">
         <h1 className="text-3xl font-bold mb-6 select-none pointer-events-none">Utaite Birthday Dashboard</h1>
         <FilterControls filters={filters} setFilters={setFilters} />
-        <BirthdayTable 
-          initialBirthdays={birthdays} 
-          filters={filters} 
-          onDataChange={refreshBirthdays} 
+        <BirthdayTable
+          initialBirthdays={birthdays}
+          filters={filters}
+          onDataChange={refreshBirthdays}
+          isLoading={isLoading}
         />
       </main>
       <footer className='mb-12 mt-2'>

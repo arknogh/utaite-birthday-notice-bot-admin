@@ -20,7 +20,7 @@ import { BirthdayForm } from './birthday-form';
 import { deleteBirthday } from '@/lib/actions';
 import { Birthday, FilterValues } from '@/lib/definitions';
 import { PaginationControls } from './pagination-controls';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 type SortKey = 'utaiteName' | 'birthday';
@@ -59,7 +59,7 @@ const Header = ({
     );
 };
 
-export function BirthdayTable({ initialBirthdays, filters, onDataChange }: { initialBirthdays: Birthday[], filters: FilterValues, onDataChange: () => void }) {
+export function BirthdayTable({ initialBirthdays, filters, onDataChange, isLoading }: { initialBirthdays: Birthday[], filters: FilterValues, onDataChange: () => void, isLoading: boolean }) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
     
@@ -72,6 +72,10 @@ export function BirthdayTable({ initialBirthdays, filters, onDataChange }: { ini
 
     const filteredAndSortedBirthdays = useMemo(() => {
         let filtered = initialBirthdays;
+
+        if (filters.search) {
+            filtered = filtered.filter(b => b.utaiteName.toLowerCase().includes(filters.search.toLowerCase()));
+        }
 
         if (filters.name && filters.name !== 'all') {
             const firstChar = filters.name.toLowerCase();
@@ -151,6 +155,15 @@ export function BirthdayTable({ initialBirthdays, filters, onDataChange }: { ini
         setIsAlertOpen(false);
         setBirthdayToDelete(null);
     };
+    
+    const noDataMessage = useMemo(() => {
+        const activeFilters = Object.entries(filters)
+            .filter(([key, value]) => value && value !== 'all')
+            .map(([key, value]) => `${key}: ${value}`)
+            .join(', ');
+
+        return activeFilters ? `No data found with filters: ${activeFilters}` : 'No data found.';
+    }, [filters]);
 
     return (
         <>
@@ -173,27 +186,41 @@ export function BirthdayTable({ initialBirthdays, filters, onDataChange }: { ini
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedBirthdays.map((bday) => (
-                        <TableRow key={bday._id.toString()}>
-                            <TableCell className="font-medium">
-                                <Link href={`https://utaite.fandom.com/wiki/${bday.utaiteName}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                                    {bday.utaiteName}
-                                </Link>
-                            </TableCell>
-                            <TableCell>{bday.birthday}</TableCell>
-                            <TableCell>
-                                {bday.twitterLink ? (
-                                    <a href={bday.twitterLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
-                                    Link
-                                    </a>
-                                ) : ('N/A')}
-                            </TableCell>
-                            <TableCell className="text-right">
-                                <Button variant="outline" size="sm" className="mr-2 cursor-pointer" onClick={() => handleEdit(bday)}>Edit</Button>
-                                <Button variant="destructive" size="sm" className='cursor-pointer' onClick={() => handleDeleteClick(bday._id.toString())}>Delete</Button>
+                    {isLoading ? (
+                        <TableRow>
+                            <TableCell colSpan={4} className="h-24 text-center">
+                                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
                             </TableCell>
                         </TableRow>
-                    ))}
+                    ) : paginatedBirthdays.length > 0 ? (
+                        paginatedBirthdays.map((bday) => (
+                            <TableRow key={bday._id.toString()}>
+                                <TableCell className="font-medium">
+                                    <Link href={`https://utaite.fandom.com/wiki/${bday.utaiteName}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                        {bday.utaiteName}
+                                    </Link>
+                                </TableCell>
+                                <TableCell>{bday.birthday}</TableCell>
+                                <TableCell>
+                                    {bday.twitterLink ? (
+                                        <a href={bday.twitterLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                        Link
+                                        </a>
+                                    ) : ('N/A')}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="outline" size="sm" className="mr-2 cursor-pointer" onClick={() => handleEdit(bday)}>Edit</Button>
+                                    <Button variant="destructive" size="sm" className='cursor-pointer' onClick={() => handleDeleteClick(bday._id.toString())}>Delete</Button>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow>
+                            <TableCell colSpan={4} className="h-24 text-center">
+                                {noDataMessage}
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>

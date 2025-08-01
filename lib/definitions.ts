@@ -45,4 +45,5 @@ export type FilterValues = {
     name: string;
     year: string;
     twitter: string;
+    search: string;
 }

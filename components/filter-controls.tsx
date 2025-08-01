@@ -7,6 +7,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FilterValues } from "@/lib/definitions";
 
@@ -24,6 +25,16 @@ export function FilterControls({ filters, setFilters }: FilterControlsProps) {
     
     return (
         <div className="flex items-center space-x-4 mb-4">
+            <div>
+                <Label htmlFor="search-filter">Search</Label>
+                <Input
+                    id="search-filter"
+                    placeholder="Search by name..."
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange('search', e.target.value)}
+                    className="w-[200px]"
+                />
+            </div>
             <div>
                 <Label htmlFor="name-filter">Name starts with</Label>
                 <Select value={filters.name} onValueChange={(value) => handleFilterChange('name', value)}>
