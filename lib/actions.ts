@@ -56,8 +56,7 @@ export async function createBirthday(prevState: State, formData: FormData) {
             twitterLink,
             createdAt: new Date(),
         });
-    } catch (e) {
-        console.error("Database Insert Error:", e);
+    } catch {
         return { message: 'Database Error: Failed to create birthday.' };
     }
 
@@ -99,7 +98,7 @@ export async function updateBirthday(prevState: State, formData: FormData) {
             { _id: new ObjectId(id) },
             { $set: dataToUpdate }
         );
-    } catch (e) {
+    } catch {
         return { message: 'Database Error: Failed to update birthday.' };
     }
     
@@ -113,7 +112,7 @@ export async function deleteBirthday(id: string) {
     try {
         const collection = await getBirthdaysCollection();
         await collection.deleteOne({ _id: new ObjectId(id) });
-    } catch (e) {
+    } catch {
         return { message: 'Database Error: Failed to delete birthday.' };
     }
     
