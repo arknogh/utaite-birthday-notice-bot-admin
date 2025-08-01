@@ -1,6 +1,6 @@
 'use client';
 
-import { useActionState, useEffect } from 'react';
+import { useActionState, useEffect, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,7 +35,8 @@ function SubmitButton({ isEditMode }: { isEditMode: boolean }) {
 export function BirthdayForm({ isOpen, setIsOpen, birthday, onSuccess }: BirthdayFormProps) {
     const isEditMode = !!birthday;
     const action = isEditMode ? updateBirthday : createBirthday;
-    
+    const previousBirthdayIdRef = useRef(birthday?._id?.toString() || '');
+
     const initialState = { message: "", errors: {} };
     const [state, dispatch] = useActionState(action, initialState);
 
@@ -61,13 +62,17 @@ export function BirthdayForm({ isOpen, setIsOpen, birthday, onSuccess }: Birthda
     }, [state, setIsOpen, onSuccess, reset]);
 
     useEffect(() => {
-        reset({
-            id: birthday?._id.toString() || '',
-            utaiteName: birthday?.utaiteName || '',
-            birthday: birthday?.birthday || '',
-            twitterLink: birthday?.twitterLink || '',
-        });
-    }, [birthday, isOpen, reset]);
+        const currentBirthdayId = birthday?._id?.toString() || '';
+        if (currentBirthdayId !== previousBirthdayIdRef.current) {
+            reset({
+                id: currentBirthdayId,
+                utaiteName: birthday?.utaiteName || '',
+                birthday: birthday?.birthday || '',
+                twitterLink: birthday?.twitterLink || '',
+            });
+            previousBirthdayIdRef.current = currentBirthdayId;
+        }
+    }, [birthday, reset]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
