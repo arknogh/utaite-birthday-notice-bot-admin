@@ -18,10 +18,47 @@ import {
 } from "@/components/ui/alert-dialog";
 import { BirthdayForm } from './birthday-form';
 import { deleteBirthday } from '@/lib/actions';
-import { Birthday } from '@/lib/definitions';
+import { Birthday, FilterValues } from '@/lib/definitions';
 import { PaginationControls } from './pagination-controls';
+import { ArrowUpDown } from 'lucide-react';
 
-export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday[] }) {
+type SortKey = 'utaiteName' | 'birthday';
+
+const Header = ({
+    children,
+    sortKey,
+    sorting,
+    setSorting,
+    className
+}: {
+    children: React.ReactNode;
+    sortKey: SortKey;
+    sorting: { key: SortKey; direction: 'ascending' | 'descending' };
+    setSorting: (sorting: { key: SortKey; direction: 'ascending' | 'descending' }) => void;
+    className?: string;
+}) => {
+    const isSorted = sorting.key === sortKey;
+    const isAscending = sorting.direction === 'ascending';
+
+    const handleClick = () => {
+        if (isSorted) {
+            setSorting({ key: sortKey, direction: isAscending ? 'descending' : 'ascending' });
+        } else {
+            setSorting({ key: sortKey, direction: 'ascending' });
+        }
+    };
+
+    return (
+        <TableHead className={className}>
+            <Button variant="ghost" onClick={handleClick}>
+                {children}
+                <ArrowUpDown className={`ml-2 h-4 w-4 ${isSorted ? 'text-blue-500' : ''}`} />
+            </Button>
+        </TableHead>
+    );
+};
+
+export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays: Birthday[], filters: FilterValues }) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
     
@@ -30,12 +67,58 @@ export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [sorting, setSorting] = useState<{ key: SortKey; direction: 'ascending' | 'descending' }>({ key: 'utaiteName', direction: 'ascending' });
+
+    const filteredAndSortedBirthdays = useMemo(() => {
+        let filtered = initialBirthdays;
+
+        if (filters.name && filters.name !== 'all') {
+            const firstChar = filters.name.toLowerCase();
+            if (firstChar === '#') {
+                filtered = filtered.filter(b => !/^[a-z]/i.test(b.utaiteName.charAt(0)));
+            } else {
+                filtered = filtered.filter(b => b.utaiteName.toLowerCase().startsWith(firstChar));
+            }
+        }
+
+        if (filters.year && filters.year !== 'all') {
+            if (filters.year === 'yes') {
+                filtered = filtered.filter(b => /^\d{4}/.test(b.birthday));
+            } else if (filters.year === 'no') {
+                filtered = filtered.filter(b => !/^\d{4}/.test(b.birthday));
+            }
+        }
+
+        if (filters.twitter && filters.twitter !== 'all') {
+            if (filters.twitter === 'yes') {
+                filtered = filtered.filter(b => b.twitterLink && b.twitterLink.trim() !== '');
+            } else if (filters.twitter === 'no') {
+                filtered = filtered.filter(b => !b.twitterLink || b.twitterLink.trim() === '');
+            }
+        }
+
+        const sorted = [...filtered].sort((a, b) => {
+            const aValue = a[sorting.key];
+            const bValue = b[sorting.key];
+
+            if (aValue < bValue) {
+                return sorting.direction === 'ascending' ? -1 : 1;
+            }
+            if (aValue > bValue) {
+                return sorting.direction === 'ascending' ? 1 : -1;
+            }
+            return 0;
+        });
+
+        return sorted;
+
+    }, [initialBirthdays, filters, sorting]);
 
     const paginatedBirthdays = useMemo(() => {
         const startIndex = (currentPage - 1) * rowsPerPage;
         const endIndex = startIndex + rowsPerPage;
-        return initialBirthdays.slice(startIndex, endIndex);
-    }, [initialBirthdays, currentPage, rowsPerPage]);
+        return filteredAndSortedBirthdays.slice(startIndex, endIndex);
+    }, [filteredAndSortedBirthdays, currentPage, rowsPerPage]);
 
 
     const handleAdd = () => {
@@ -76,9 +159,13 @@ export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday
             <Table>
                 <TableCaption>A list of birthdays in the database.</TableCaption>
                 <TableHeader>
-                    <TableRow>
-                    <TableHead className="w-[250px]">Name</TableHead>
-                    <TableHead>Birthday</TableHead>
+                <TableRow>
+                    <Header sortKey="utaiteName" sorting={sorting} setSorting={setSorting} className="w-[250px]">
+                        Name
+                    </Header>
+                    <Header sortKey="birthday" sorting={sorting} setSorting={setSorting}>
+                        Birthday
+                    </Header>
                     <TableHead>Twitter</TableHead>
                     <TableHead className="text-right w-[200px]">Actions</TableHead>
                     </TableRow>
@@ -105,7 +192,7 @@ export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday
             </Table>
         </div>
         <PaginationControls
-            totalRows={initialBirthdays.length}
+            totalRows={filteredAndSortedBirthdays.length}
             rowsPerPage={rowsPerPage}
             setRowsPerPage={setRowsPerPage}
             currentPage={currentPage}
@@ -117,7 +204,6 @@ export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday
             birthday={selectedBirthday}
         />
 
-        {/* The Delete Confirmation Dialog */}
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>

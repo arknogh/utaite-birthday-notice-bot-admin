@@ -40,3 +40,9 @@ export type Birthday = {
     twitterLink?: string;
     createdAt: Date;
     };
+
+export type FilterValues = {
+    name: string;
+    year: string;
+    twitter: string;
+}
