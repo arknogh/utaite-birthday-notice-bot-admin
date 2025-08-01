@@ -23,7 +23,11 @@ const getBirthdaysCollection = async () => {
 
 export async function getBirthdays() {
     const collection = await getBirthdaysCollection();
-    const birthdays = await collection.find({}).sort({ utaiteName: 1 }).toArray();
+    const birthdays = await collection.find({})
+        .collation({ locale: 'en', strength: 2 })
+        .sort({ utaiteName: 1 })
+        .toArray();
+
     return JSON.parse(JSON.stringify(birthdays));
 }
 
@@ -35,6 +39,7 @@ export async function createBirthday(prevState: State, formData: FormData) {
     });
 
     if (!validatedFields.success) {
+        console.error("Zod Validation Error:", validatedFields.error.flatten());
         return {
             errors: validatedFields.error.flatten().fieldErrors,
             message: 'Failed to create birthday. Please check the fields.',
@@ -52,6 +57,7 @@ export async function createBirthday(prevState: State, formData: FormData) {
             createdAt: new Date(),
         });
     } catch (e) {
+        console.error("Database Insert Error:", e);
         return { message: 'Database Error: Failed to create birthday.' };
     }
 
@@ -68,6 +74,7 @@ export async function updateBirthday(prevState: State, formData: FormData) {
     });
     
     if (!validatedFields.success) {
+        console.error("Zod Validation Error:", validatedFields.error.flatten());
         return {
             errors: validatedFields.error.flatten().fieldErrors,
             message: 'Failed to update birthday. Please check the fields.',
