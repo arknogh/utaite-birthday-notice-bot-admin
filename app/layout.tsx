@@ -1,12 +1,11 @@
-'use client';
-
-import { usePathname } from 'next/navigation';
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from 'next';
+import { Geist } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
-import Head from 'next/head';
+import { LayoutClientWrapper } from '@/components/layout-client-wrapper';
+import React from 'react';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,20 +17,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Utaite Birthday Notifier',
+    default: 'Admin Dashboard | Utaite Birthday Notifier',
+  },
+  description: 'The admin dashboard for the Utaite Wiki Project\'s Birthday Notifier Bot.',
+  // icons: { icon: "/favicon.ico" },
+};
+
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isAuthPage = pathname.startsWith('/auth');
-
   return (
-    <>
     <html lang="en" suppressHydrationWarning>
-      <Head>
-        <title>Utaite Birthday Notifier Bot - Admin Page | Utaite Wiki Project</title>
-      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -41,12 +44,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {!isAuthPage && <Navbar />}
-          {children}
+          <LayoutClientWrapper>{children}</LayoutClientWrapper>
           <Toaster />
         </ThemeProvider>
       </body>
     </html>
-    </>
   );
 }
