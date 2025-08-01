@@ -25,7 +25,7 @@ interface BirthdayFormProps {
 function SubmitButton({ isEditMode }: { isEditMode: boolean }) {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending}>
+        <Button type="submit" disabled={pending} className='cursor-pointer'>
             {pending ? 'Saving...' : isEditMode ? 'Save Changes' : 'Create Birthday'}
         </Button>
     );

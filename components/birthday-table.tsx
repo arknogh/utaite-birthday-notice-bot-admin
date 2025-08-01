@@ -154,7 +154,7 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
     return (
         <>
         <div className="flex justify-end mb-4">
-            <Button onClick={handleAdd}>Add Birthday</Button>
+            <Button onClick={handleAdd} className='cursor-pointer'>Add Birthday</Button>
         </div>
         <div className="rounded-md border">
             <Table>
@@ -184,8 +184,8 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
                                 ) : ('N/A')}
                             </TableCell>
                             <TableCell className="text-right">
-                                <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEdit(bday)}>Edit</Button>
-                                <Button variant="destructive" size="sm" onClick={() => handleDeleteClick(bday._id.toString())}>Delete</Button>
+                                <Button variant="outline" size="sm" className="mr-2 cursor-pointer" onClick={() => handleEdit(bday)}>Edit</Button>
+                                <Button variant="destructive" size="sm" className='cursor-pointer' onClick={() => handleDeleteClick(bday._id.toString())}>Delete</Button>
                             </TableCell>
                         </TableRow>
                     ))}
