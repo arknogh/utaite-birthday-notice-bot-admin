@@ -1,13 +1,13 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 import clientPromise from './mongodb';
-import { BirthdaySchema } from './definitions';
+import { BirthdaySchema, CreateBirthdaySchema } from './definitions';
 import { ObjectId } from 'mongodb';
 
 type State = {
     errors?: {
+        id?: string[];
         utaiteName?: string[];
         birthday?: string[];
         twitterLink?: string[];
@@ -24,12 +24,11 @@ const getBirthdaysCollection = async () => {
 export async function getBirthdays() {
     const collection = await getBirthdaysCollection();
     const birthdays = await collection.find({}).sort({ utaiteName: 1 }).toArray();
-    // Serialize the _id to a string for client-side usage
     return JSON.parse(JSON.stringify(birthdays));
 }
 
 export async function createBirthday(prevState: State, formData: FormData) {
-    const validatedFields = BirthdaySchema.safeParse({
+    const validatedFields = CreateBirthdaySchema.safeParse({
         utaiteName: formData.get('utaiteName'),
         birthday: formData.get('birthday'),
         twitterLink: formData.get('twitterLink'),
@@ -37,26 +36,26 @@ export async function createBirthday(prevState: State, formData: FormData) {
 
     if (!validatedFields.success) {
         return {
-        errors: validatedFields.error.flatten().fieldErrors,
-        message: 'Failed to create birthday. Please check the fields.',
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Failed to create birthday. Please check the fields.',
         };
     }
-
+    
     const { utaiteName, birthday, twitterLink } = validatedFields.data;
 
     try {
         const collection = await getBirthdaysCollection();
         await collection.insertOne({
-        utaiteName,
-        birthday,
-        twitterLink,
-        createdAt: new Date(),
+            utaiteName,
+            birthday,
+            twitterLink,
+            createdAt: new Date(),
         });
     } catch (e) {
         return { message: 'Database Error: Failed to create birthday.' };
     }
 
-    revalidatePath('/'); // This clears the cache and refetches the data
+    revalidatePath('/');
     return { message: 'Successfully created birthday.' };
 }
 
@@ -110,7 +109,7 @@ export async function deleteBirthday(id: string) {
     } catch (e) {
         return { message: 'Database Error: Failed to delete birthday.' };
     }
-
+    
     revalidatePath('/');
     return { message: 'Successfully deleted birthday.' };
 }

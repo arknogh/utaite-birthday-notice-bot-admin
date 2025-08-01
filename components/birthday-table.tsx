@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import {
     Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow
@@ -9,10 +9,20 @@ import { Button } from "@/components/ui/button";
 import { BirthdayForm } from './birthday-form';
 import { deleteBirthday } from '@/lib/actions';
 import { Birthday } from '@/lib/definitions';
+import { PaginationControls } from './pagination-controls';
 
 export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday[] }) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const paginatedBirthdays = useMemo(() => {
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        return initialBirthdays.slice(startIndex, endIndex);
+    }, [initialBirthdays, currentPage, rowsPerPage]);
 
     const handleAdd = () => {
         setSelectedBirthday(null);
@@ -52,26 +62,38 @@ export function BirthdayTable({ initialBirthdays }: { initialBirthdays: Birthday
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {initialBirthdays.map((bday) => (
-                    <TableRow key={bday._id.toString()}>
-                        <TableCell className="font-medium">{bday.utaiteName}</TableCell>
-                        <TableCell>{bday.birthday}</TableCell>
-                        <TableCell>
+                    {paginatedBirthdays.map((bday) => (
+                        <TableRow key={bday._id.toString()}>
+                            <TableCell className="font-medium">{bday.utaiteName}</TableCell>
+                            <TableCell>{bday.birthday}</TableCell>
+                            <TableCell>
                             {bday.twitterLink ? (
                                 <a href={bday.twitterLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
                                 Link
                                 </a>
                             ) : ('N/A')}
-                        </TableCell>
-                        <TableCell className="text-right">
+                            </TableCell>
+                            <TableCell className="text-right">
                             <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEdit(bday)}>Edit</Button>
                             <Button variant="destructive" size="sm" onClick={() => handleDelete(bday._id.toString())}>Delete</Button>
-                        </TableCell>
-                    </TableRow>
+                            </TableCell>
+                        </TableRow>
                     ))}
                 </TableBody>
             </Table>
         </div>
+        <PaginationControls
+            totalRows={initialBirthdays.length}
+            rowsPerPage={rowsPerPage}
+            setRowsPerPage={setRowsPerPage}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+        />
+        <BirthdayForm
+            isOpen={isFormOpen}
+            setIsOpen={setIsFormOpen}
+            birthday={selectedBirthday}
+        />
         <BirthdayForm
             isOpen={isFormOpen}
             setIsOpen={setIsFormOpen}
