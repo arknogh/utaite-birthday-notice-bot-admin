@@ -21,6 +21,7 @@ import { deleteBirthday } from '@/lib/actions';
 import { Birthday, FilterValues } from '@/lib/definitions';
 import { PaginationControls } from './pagination-controls';
 import { ArrowUpDown } from 'lucide-react';
+import Link from 'next/link';
 
 type SortKey = 'utaiteName' | 'birthday';
 
@@ -173,7 +174,7 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
                 <TableBody>
                     {paginatedBirthdays.map((bday) => (
                         <TableRow key={bday._id.toString()}>
-                            <TableCell className="font-medium">{bday.utaiteName}</TableCell>
+                            <TableCell className="font-medium"><Link className='text-blue-500 hover:text-blue-800 dark:text-blue-400 hover:dark:text-violet-300' href={`https://utaite.fandom.com/wiki/${bday.utaiteName}`} target='_blank'>{bday.utaiteName}</Link></TableCell>
                             <TableCell>{bday.birthday}</TableCell>
                             <TableCell>
                                 {bday.twitterLink ? (
