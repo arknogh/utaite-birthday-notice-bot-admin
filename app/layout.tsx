@@ -6,6 +6,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/navbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import Head from 'next/head';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +27,11 @@ export default function RootLayout({
   const isAuthPage = pathname.startsWith('/auth');
 
   return (
+    <>
     <html lang="en" suppressHydrationWarning>
+      <Head>
+        <title>Utaite Birthday Notifier Bot - Admin Page | Utaite Wiki Project</title>
+      </Head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -42,5 +47,6 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
     </html>
+    </>
   );
 }
