@@ -12,7 +12,7 @@ type State = {
         birthday?: string[];
         twitterLink?: string[];
     };
-    message?: string | null;
+    message: string;
 };
 
 const getBirthdaysCollection = async () => {
@@ -67,16 +67,25 @@ export async function updateBirthday(prevState: State, formData: FormData) {
         birthday: formData.get('birthday'),
         twitterLink: formData.get('twitterLink'),
     });
-
+    
     if (!validatedFields.success) {
         return {
             errors: validatedFields.error.flatten().fieldErrors,
             message: 'Failed to update birthday. Please check the fields.',
         };
     }
+    
+    const { id, utaiteName, birthday, twitterLink } = validatedFields.data;
 
-    const { id, ...dataToUpdate } = validatedFields.data;
-    if (!id) return { message: 'Missing ID for update.' };
+    if (typeof id !== 'string' || id.length === 0) {
+        return { message: 'Missing or invalid ID for update.' };
+    }
+
+    const dataToUpdate = {
+        utaiteName,
+        birthday,
+        twitterLink,
+    };
 
     try {
         const collection = await getBirthdaysCollection();
@@ -87,7 +96,7 @@ export async function updateBirthday(prevState: State, formData: FormData) {
     } catch (e) {
         return { message: 'Database Error: Failed to update birthday.' };
     }
-
+    
     revalidatePath('/');
     return { message: 'Successfully updated birthday.' };
 }
