@@ -20,18 +20,19 @@ interface BirthdayFormProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
     birthday?: Birthday | null;
+    onSuccess: () => void;
 }
 
 function SubmitButton({ isEditMode }: { isEditMode: boolean }) {
     const { pending } = useFormStatus();
     return (
-        <Button type="submit" disabled={pending} className='cursor-pointer'>
+        <Button type="submit" className='cursor-pointer' disabled={pending}>
             {pending ? 'Saving...' : isEditMode ? 'Save Changes' : 'Create Birthday'}
         </Button>
     );
 }
 
-export function BirthdayForm({ isOpen, setIsOpen, birthday }: BirthdayFormProps) {
+export function BirthdayForm({ isOpen, setIsOpen, birthday, onSuccess }: BirthdayFormProps) {
     const isEditMode = !!birthday;
     const action = isEditMode ? updateBirthday : createBirthday;
     
@@ -50,12 +51,14 @@ export function BirthdayForm({ isOpen, setIsOpen, birthday }: BirthdayFormProps)
 
     useEffect(() => {
         if (state.message?.startsWith('Success')) {
-        toast.success(state.message);
-        setIsOpen(false);
+            toast.success(state.message);
+            onSuccess();
+            setIsOpen(false);
+            reset({ id: '', utaiteName: '', birthday: '', twitterLink: '' });
         } else if (state.message && state.message !== "") {
-        toast.error(state.message);
+            toast.error(state.message);
         }
-    }, [state, setIsOpen]);
+    }, [state, setIsOpen, onSuccess, reset]);
 
     useEffect(() => {
         reset({
@@ -65,7 +68,6 @@ export function BirthdayForm({ isOpen, setIsOpen, birthday }: BirthdayFormProps)
             twitterLink: birthday?.twitterLink || '',
         });
     }, [birthday, isOpen, reset]);
-
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

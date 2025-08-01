@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getBirthdays } from "@/lib/actions";
 import { BirthdayTable } from "@/components/birthday-table";
 import { FilterControls } from "@/components/filter-controls";
@@ -14,19 +14,31 @@ export default function Home() {
     twitter: 'all'
   });
 
-  useEffect(() => {
-    async function fetchBirthdays() {
-      const bdays = await getBirthdays();
-      setBirthdays(bdays);
-    }
-    fetchBirthdays();
+  const refreshBirthdays = useCallback(async () => {
+    const bdays = await getBirthdays();
+    setBirthdays(bdays);
   }, []);
 
+  useEffect(() => {
+    refreshBirthdays();
+  }, [refreshBirthdays]);
+
   return (
-    <main className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold mb-6">Utaite Birthday Dashboard</h1>
-      <FilterControls filters={filters} setFilters={setFilters} />
-      <BirthdayTable initialBirthdays={birthdays} filters={filters} />
-    </main>
+    <>
+      <main className="container mx-auto py-10">
+        <h1 className="text-3xl font-bold mb-6 select-none pointer-events-none">Utaite Birthday Dashboard</h1>
+        <FilterControls filters={filters} setFilters={setFilters} />
+        <BirthdayTable 
+          initialBirthdays={birthdays} 
+          filters={filters} 
+          onDataChange={refreshBirthdays} 
+        />
+      </main>
+      <footer className='mb-12 mt-2'>
+        <div className='text-center text-lg text-slate-500 dark:text-slate-400'>
+          Utaite Wiki Project
+        </div>
+      </footer>
+    </>
   );
 }

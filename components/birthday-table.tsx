@@ -59,7 +59,7 @@ const Header = ({
     );
 };
 
-export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays: Birthday[], filters: FilterValues }) {
+export function BirthdayTable({ initialBirthdays, filters, onDataChange }: { initialBirthdays: Birthday[], filters: FilterValues, onDataChange: () => void }) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedBirthday, setSelectedBirthday] = useState<Birthday | null>(null);
     
@@ -143,6 +143,7 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
         const result = await deleteBirthday(birthdayToDelete);
         if (result.message?.startsWith('Success')) {
             toast.success(result.message);
+            onDataChange();
         } else {
             toast.error(result.message || 'An unknown error occurred.');
         }
@@ -154,11 +155,11 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
     return (
         <>
         <div className="flex justify-end mb-4">
-            <Button onClick={handleAdd} className='cursor-pointer'>Add Birthday</Button>
+            <Button className='cursor-pointer' onClick={handleAdd}>Add Birthday</Button>
         </div>
         <div className="rounded-md border">
             <Table>
-                <TableCaption>A list of birthdays in the database.</TableCaption>
+                {/* <TableCaption>A list of birthdays in the database.</TableCaption> */}
                 <TableHeader>
                 <TableRow>
                     <Header sortKey="utaiteName" sorting={sorting} setSorting={setSorting} className="w-[250px]">
@@ -174,7 +175,11 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
                 <TableBody>
                     {paginatedBirthdays.map((bday) => (
                         <TableRow key={bday._id.toString()}>
-                            <TableCell className="font-medium"><Link className='text-blue-500 hover:text-blue-800 dark:text-blue-400 hover:dark:text-violet-300' href={`https://utaite.fandom.com/wiki/${bday.utaiteName}`} target='_blank'>{bday.utaiteName}</Link></TableCell>
+                            <TableCell className="font-medium">
+                                <Link href={`https://utaite.fandom.com/wiki/${bday.utaiteName}`} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                    {bday.utaiteName}
+                                </Link>
+                            </TableCell>
                             <TableCell>{bday.birthday}</TableCell>
                             <TableCell>
                                 {bday.twitterLink ? (
@@ -203,6 +208,7 @@ export function BirthdayTable({ initialBirthdays, filters }: { initialBirthdays:
             isOpen={isFormOpen}
             setIsOpen={setIsFormOpen}
             birthday={selectedBirthday}
+            onSuccess={onDataChange}
         />
 
         <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
