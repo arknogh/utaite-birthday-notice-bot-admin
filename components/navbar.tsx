@@ -20,7 +20,7 @@ export function Navbar() {
                 </h1>
                 <div>
                     <ThemeToggle />
-                    <Button onClick={handleLogout} variant="outline" className="ml-4">Logout</Button>
+                    <Button onClick={handleLogout} variant="outline" className="ml-4 cursor-pointer">Logout</Button>
                 </div>
             </div>
         </nav>
