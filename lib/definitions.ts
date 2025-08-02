@@ -46,4 +46,6 @@ export type FilterValues = {
     year: string;
     twitter: string;
     search: string;
+    month: string;
+    day: string;
 }

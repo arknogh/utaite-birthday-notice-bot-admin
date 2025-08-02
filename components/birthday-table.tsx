@@ -86,6 +86,22 @@ export function BirthdayTable({ initialBirthdays, filters, onDataChange, isLoadi
             }
         }
 
+        if (filters.month && filters.month !== 'all') {
+            filtered = filtered.filter(b => {
+                const parts = b.birthday.split('-');
+                const month = parts.length === 3 ? parts[1] : parts[0];
+                return month === filters.month;
+            });
+        }
+
+        if (filters.day && filters.day !== 'all') {
+            filtered = filtered.filter(b => {
+                const parts = b.birthday.split('-');
+                const day = parts.length === 3 ? parts[2] : parts[1];
+                return day === filters.day.padStart(2, '0');
+            });
+        }
+
         if (filters.year && filters.year !== 'all') {
             if (filters.year === 'yes') {
                 filtered = filtered.filter(b => /^\d{4}/.test(b.birthday));

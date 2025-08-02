@@ -12,7 +12,9 @@ export default function Home() {
     name: 'all',
     year: 'all',
     twitter: 'all',
-    search: ''
+    search: '',
+    month: 'all',
+    day: 'all'
   });
   const [isLoading, setIsLoading] = useState(true);
 
